@@ -24,8 +24,8 @@ from app.controller import (
     get_user_name_by_id,
     update_user
 )
-from app.models import User, Product
-from app.serializers import UserSerializer, ProductSerializer
+from app.models import User, Product, OrderProduct, Order
+from app.serializers import UserSerializer, ProductSerializer, OrderSerializer
 from app.utils import sanitize_json_input
 
 
@@ -98,3 +98,13 @@ class ProductAPIView(RetrieveUpdateDestroyAPIView):
     def get_object(self):
         product_obj = Product.objects.get(id=self.kwargs.get('product_id'))
         return product_obj
+
+
+class OrdersAPIView(ListCreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = OrderSerializer
+
+    def get_queryset(self):
+        orders = Order.objects.filter(user_id=self.request.user.id)
+        order_products = OrderProduct.objects.filter(order__in=list(orders))
+        return order_products

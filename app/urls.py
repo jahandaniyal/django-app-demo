@@ -10,4 +10,5 @@ urlpatterns = [
     re_path(r'user/(?P<user_id>[^/]+)$', views.UserAPIView.as_view(), name='user'),
     path('product/', views.ProductsAPIView.as_view(), name='products'),
     re_path(r'product/(?P<product_id>[^/]+)$', views.ProductAPIView.as_view(), name='product'),
+    path('order/', views.OrdersAPIView.as_view(), name='orders'),
 ]

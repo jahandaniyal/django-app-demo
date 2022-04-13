@@ -3,7 +3,9 @@
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
-from app.models import User, Product
+from app.models import User, Product, Order, OrderProduct
+from django.db import transaction
+from django.core.exceptions import BadRequest
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -45,8 +47,6 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    # tags = TagSerializer(many=True, required=False)
-
     class Meta:
         model = Product
         fields = ('name', 'price', 'stock')
@@ -57,3 +57,50 @@ class ProductSerializer(serializers.ModelSerializer):
         """Return a serialised dict containing `UsageType` data"""
         data = super().to_representation(instance)
         return data
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderProduct
+        fields = ('product', 'quantity')
+        extra_kwargs = {
+            "product": {'required': False},
+        }
+
+    def to_representation(self, instance):
+        """Return a serialised dict containing `UsageType` data"""
+        if isinstance(instance, list):
+            return {'status': 'created'}
+        else:
+            data = super().to_representation(instance)
+            data['name'] = instance.product.name
+            data['unit_price'] = instance.product.price
+            data['total'] = instance.product.price * instance.quantity
+            data['created_at'] = instance.order.created_at
+            data['updated_at'] = instance.order.created_at
+        return data
+
+    @transaction.atomic
+    def create(self, validated_data):
+        """
+        Create and return a `User` with an username and password.
+        """
+        pass
+        user = self.context['request'].user
+        validated_data['user_id'] = user
+        order_obj = Order.objects.create(user_id=user)
+        ordered_items = []
+        update_product = []
+        for item in self.context['request'].data.get('products'):
+            ordered_items.append(OrderProduct(order=order_obj, product_id=item['id'], quantity=item['quantity']))
+            product = Product.objects.get(id=item['id'])
+            product.stock -= item['quantity']
+            if product.stock < 0:
+                raise BadRequest('Not enough item in Stock')
+            update_product.append(product)
+
+        orders_product = OrderProduct.objects.bulk_create(ordered_items)
+        Product.objects.bulk_update(update_product, ['stock'])
+        return orders_product
+
+

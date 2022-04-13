@@ -77,3 +77,29 @@ class Product(models.Model):
     stock = models.IntegerField(default=0)
     created_at = models.DateTimeField(default=now)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+
+class Order(models.Model):
+    """
+    ToDos
+    """
+    user_id = models.ForeignKey(
+        'User',
+        on_delete=models.CASCADE,
+    )
+    created_at = models.DateTimeField(default=now)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class OrderProduct(models.Model):
+    """
+    ToDos
+    """
+    class Meta:
+        unique_together = ('order', 'product')
+
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=1)
+
