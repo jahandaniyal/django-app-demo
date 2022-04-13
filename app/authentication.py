@@ -39,7 +39,7 @@ class AuthorAndAllAdmins(permissions.BasePermission):
         return False
 
 
-class IsAuthenticatedOrReadOnly(permissions.BasePermission):
+class IsAdminOrReadOnly(permissions.BasePermission):
     """Allow all access to Admin or only ReadOnly access to other Users
     Attributes:
         SAFE_METHODS (tuple): Tuple of all permissible HTTP Methods for this Auth Class.
@@ -61,7 +61,7 @@ class IsAuthenticatedOrReadOnly(permissions.BasePermission):
         if request.method not in self.SAFE_METHODS:
             return False
 
-        if request.user and request.user.is_authenticated:
+        if request.user and request.user.is_superuser:
             return True
 
         elif request.method == "GET":

@@ -3,7 +3,7 @@
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
-from app.models import User
+from app.models import User, Product
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -42,3 +42,18 @@ class UserSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    # tags = TagSerializer(many=True, required=False)
+
+    class Meta:
+        model = Product
+        fields = ('name', 'price', 'stock')
+        extra_kwargs = {
+        }
+
+    def to_representation(self, instance):
+        """Return a serialised dict containing `UsageType` data"""
+        data = super().to_representation(instance)
+        return data

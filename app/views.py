@@ -2,11 +2,14 @@
 
 import json
 
+from django.db.models import Q
 from rest_framework.generics import (
     CreateAPIView,
+    ListCreateAPIView,
     RetrieveAPIView,
     RetrieveUpdateDestroyAPIView
 )
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import (
     AllowAny,
     IsAdminUser,
@@ -14,15 +17,15 @@ from rest_framework.permissions import (
 )
 from rest_framework.response import Response
 
-from app.authentication import AuthorAndAllAdmins
+from app.authentication import AuthorAndAllAdmins, IsAdminOrReadOnly
 from app.controller import (
     delete_user,
     get_all_users,
     get_user_name_by_id,
     update_user
 )
-from app.models import User
-from app.serializers import UserSerializer
+from app.models import User, Product
+from app.serializers import UserSerializer, ProductSerializer
 from app.utils import sanitize_json_input
 
 
@@ -67,3 +70,31 @@ class UserAPIView(RetrieveUpdateDestroyAPIView):
         delete_user(kwargs.get('user_id'))
         content = 'User {} has been deleted'.format(user_name)
         return Response(content)
+
+
+class ProductsAPIView(ListCreateAPIView):
+    permission_classes = (IsAuthenticated, IsAdminOrReadOnly)
+    serializer_class = ProductSerializer
+
+    def get_queryset(self):
+        max_price = self.request.query_params.get('max_price')
+        keyword = self.request.query_params.get('keyword')
+
+        filters = Q()
+        if max_price:
+            filters &= Q(price__lte=max_price)
+
+        if keyword:
+            filters &= Q(name__icontains=keyword)
+
+        product_obj = Product.objects.filter(filters).distinct()
+        return product_obj
+
+
+class ProductAPIView(RetrieveUpdateDestroyAPIView):
+    permission_classes = (IsAuthenticated, IsAdminOrReadOnly)
+    serializer_class = ProductSerializer
+
+    def get_object(self):
+        product_obj = Product.objects.get(id=self.kwargs.get('product_id'))
+        return product_obj
