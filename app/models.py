@@ -1,8 +1,9 @@
+import datetime
 import uuid
 
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-
+from django.utils.timezone import now
 
 class UserManager(BaseUserManager):
     """
@@ -65,3 +66,14 @@ class User(AbstractBaseUser):
 
     def has_module_perms(self):
         return self.is_superuser
+
+
+class Product(models.Model):
+    """
+    ToDos
+    """
+    name = models.CharField(max_length=200, unique=True)     # max_length not enforced at db level
+    price = models.DecimalField(default=0.0, max_digits=10, decimal_places=3)
+    stock = models.IntegerField(default=0)
+    created_at = models.DateTimeField(default=now)
+    updated_at = models.DateTimeField(auto_now=True)
