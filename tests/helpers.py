@@ -9,7 +9,7 @@ from django.utils.http import urlencode
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.test import APIClient
 
-from app.models import User
+from app.models import User, Product
 
 
 @pytest.fixture
@@ -60,6 +60,11 @@ def reverse_querystring(view, urlconf=None, args=None, kwargs=None, current_app=
     if query_kwargs:
         return '{}?{}'.format(base_url, urlencode(query_kwargs))
     return base_url
+
+
+def create_product(name, price, stock):
+    product = Product.objects.create(name=name, price=price, stock=stock)
+    return product
 
 
 @pytest.fixture
