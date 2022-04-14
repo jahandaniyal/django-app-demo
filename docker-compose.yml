@@ -38,3 +38,5 @@ services:
     restart: on-failure
     volumes:
       - .:/app
+    depends_on:
+      - db_opply

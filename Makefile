@@ -1,4 +1,4 @@
-.PHONY: build purgedb run stop
+.PHONY: build purgedb run stop test
 
 build: clean stop purgedb
 	mkdir -p '.data/db'
@@ -16,7 +16,12 @@ clean:
 	rm -rf .data
 
 run:
-	docker-compose up
+	docker-compose up	
+	
+test:
+	docker-compose up test
+	docker kill order_service_opply_db
+
 
 stop:
 	docker-compose kill orderserviceopply db_opply test
