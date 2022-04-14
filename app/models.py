@@ -1,9 +1,9 @@
-import datetime
 import uuid
 
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.utils.timezone import now
+
 
 class UserManager(BaseUserManager):
     """
@@ -20,7 +20,6 @@ class UserManager(BaseUserManager):
             name=name,
         )
         user.set_password(password)
-        print(password)
         user.save(using=self._db)
         return user
 
@@ -41,7 +40,7 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser):
     """
-    The class representing the schema of the User table.
+    The class representing the User Model.
     :param name (Characters): Name of the user.
     :param password (Characters): Password of the user.
     :param is_staff (Number): 1 if the user has admin access else 0.
@@ -70,7 +69,12 @@ class User(AbstractBaseUser):
 
 class Product(models.Model):
     """
-    ToDos
+    The class representing the Product model.
+    :param name (Characters): Name of the product.
+    :param price (Decimal): Unit price of this product.
+    :param stock (Integer): Quantity in stock.
+    :param created_at (DateTime): Time of creation.
+    :param updated_at (DateTime): Time of update.
     """
     name = models.CharField(max_length=200, unique=True)     # max_length not enforced at db level
     price = models.DecimalField(default=0.0, max_digits=10, decimal_places=3)
@@ -79,10 +83,12 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-
 class Order(models.Model):
     """
-    ToDos
+    The class representing the Order model.
+    :param user_id (f_key): ID of the user who creates this Order.
+    :param created_at (DateTime): Time of creation.
+    :param updated_at (DateTime): Time of update.
     """
     user_id = models.ForeignKey(
         'User',
@@ -94,7 +100,10 @@ class Order(models.Model):
 
 class OrderProduct(models.Model):
     """
-    ToDos
+    The class representing the OrderProduct model.
+    :param order (f_key): ID of the Order.
+    :param product (f_key): ID of the product.
+    :param quantity (Integer): Total number of product requested.
     """
     class Meta:
         unique_together = ('order', 'product')

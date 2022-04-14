@@ -17,7 +17,6 @@ def api_client_admin():
     user = User.objects.create(name='admin', password='js.sj', is_superuser=1, is_staff=1)
     client = APIClient()
     refresh = RefreshToken.for_user(user)
-    print(refresh)
     client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
 
     return client
@@ -27,7 +26,6 @@ def create_user(user_name):
     user = User.objects.create(name=user_name, password='js.sj')
     client = APIClient()
     refresh = RefreshToken.for_user(user)
-    print(refresh)
     client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
 
     return client, user
@@ -37,7 +35,6 @@ def get_user(user_name):
     user = User.objects.get(name=user_name)
     client = APIClient()
     refresh = RefreshToken.for_user(user)
-    print(refresh)
     client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
 
     return client, user

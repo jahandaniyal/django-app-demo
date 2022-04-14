@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import BadRequest
+from django.db import transaction
 from rest_framework import serializers
 
 from app.models import User, Product, Order, OrderProduct
-from django.db import transaction
-from django.core.exceptions import BadRequest
+from loggers.handler import get_logger
+
+logger = get_logger(__name__)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -47,6 +50,9 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    """
+    Allows serialisation and deserialisation of `Product` model objects.
+    """
     class Meta:
         model = Product
         fields = ('name', 'price', 'stock')
@@ -54,12 +60,15 @@ class ProductSerializer(serializers.ModelSerializer):
         }
 
     def to_representation(self, instance):
-        """Return a serialised dict containing `UsageType` data"""
+        """Return a serialised dict containing `Product` data"""
         data = super().to_representation(instance)
         return data
 
 
 class OrderSerializer(serializers.ModelSerializer):
+    """
+    Allows serialisation and deserialisation of `OrderProduct` model objects.
+    """
     class Meta:
         model = OrderProduct
         fields = ('product', 'quantity')
@@ -68,7 +77,7 @@ class OrderSerializer(serializers.ModelSerializer):
         }
 
     def to_representation(self, instance):
-        """Return a serialised dict containing `UsageType` data"""
+        """Return a serialised dict containing `OrderProducts` data"""
         if isinstance(instance, list):
             return {'status': 'created'}
         else:
@@ -83,7 +92,7 @@ class OrderSerializer(serializers.ModelSerializer):
     @transaction.atomic
     def create(self, validated_data):
         """
-        Create and return a `User` with an username and password.
+        Create and return an `Order`.
         """
         pass
         user = self.context['request'].user
@@ -96,11 +105,10 @@ class OrderSerializer(serializers.ModelSerializer):
             product = Product.objects.get(id=item['id'])
             product.stock -= item['quantity']
             if product.stock < 0:
+                logger.error(F'Order ID {order_obj.id} failed. Not enough item in Stock')
                 raise BadRequest('Not enough item in Stock')
             update_product.append(product)
 
         orders_product = OrderProduct.objects.bulk_create(ordered_items)
         Product.objects.bulk_update(update_product, ['stock'])
         return orders_product
-
-

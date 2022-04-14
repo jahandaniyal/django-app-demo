@@ -34,5 +34,7 @@ services:
   test:
     image: orderserviceopply
     command: python -m pytest
+    depends_on:
+      - db_opply
     volumes:
       - .:/app

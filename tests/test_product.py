@@ -12,7 +12,7 @@ from tests.helpers import (
 
 
 @pytest.mark.django_db
-class TestUsageTypes:
+class TestProducts:
 
     def test_create_products_admin(self, api_client_admin):
         url = reverse('products')

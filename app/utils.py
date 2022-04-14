@@ -2,6 +2,10 @@
 
 import re
 
+from loggers.handler import get_logger
+
+logger = get_logger(__name__)
+
 
 def sanitize_json_input(func):
     """Decorator for sanitizing JSON data.
@@ -20,7 +24,7 @@ def sanitize_json_input(func):
             json_string = re.sub(r",}$", "}", json_string)
             args[1].body = json_string.encode(encoding='latin1')
         except ValueError:
-            print("Incorrect JSON data")
+            logger.error("Incorrect JSON data")
 
         returned_value = func(*args, **kwargs)
 
