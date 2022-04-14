@@ -1,0 +1,40 @@
+version: '3.3'
+services:
+  orderserviceopply:
+    image: orderserviceopply
+    build:
+      context: .
+      dockerfile: DOCKERFILE
+    environment:
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    command: 'python manage.py runserver 0.0.0.0:8000'
+    container_name: order_service_opply
+    restart: on-failure
+    ports:
+      - '8000:8000'
+    volumes:
+      - .:/app
+    depends_on:
+      - db_opply
+
+  db_opply:
+    image: postgres
+    restart: always
+    container_name: order_service_opply_db
+    volumes:
+      - .data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '54321:5432'
+
+  test:
+    image: orderserviceopply
+    command: python -m pytest
+    restart: on-failure
+    volumes:
+      - .:/app
