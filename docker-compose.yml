@@ -11,6 +11,7 @@ services:
       - POSTGRES_PASSWORD=postgres
     command: 'python manage.py runserver 0.0.0.0:8000'
     container_name: order_service_opply
+    restart: on-failure
     ports:
       - '8000:8000'
     volumes:
@@ -34,7 +35,6 @@ services:
   test:
     image: orderserviceopply
     command: python -m pytest
-    depends_on:
-      - db_opply
+    restart: on-failure
     volumes:
       - .:/app
